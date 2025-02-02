@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react'
 import { UserContext } from '../context/user.context'
 import { useNavigate, useLocation } from 'react-router-dom'
 import axios from '../config/axios'
+import { initializeSocket, receiveMessage, sendMessage } from '../config/socket.js'
 
 function SyntaxHighlightedCode(props) {
     const ref = useRef(null)
@@ -66,12 +67,15 @@ const Project = () => {
     }
 
     useEffect(() => {
+        initializeSocket(project._id)
+    });
+
+    useEffect(() => {
         axios.get(`/projects/get-project/${location.state.project._id}`).then(res => {
 
             console.log(res.data.project)
 
             setProject(res.data.project)
-            setFileTree(res.data.project.fileTree || {})
         })
 
         axios.get('/users/all').then(res => {
