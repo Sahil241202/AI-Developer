@@ -31,7 +31,7 @@ export const loginController = async (req, res) => {
     }
 
     try {
-
+        console.log("Request Body:", req.body);
         const { email, password } = req.body;
 
         const user = await userModel.findOne({ email }).select('+password');
