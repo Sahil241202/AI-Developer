@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext, useRef } from 'react'
 import { UserContext } from '../context/user.context'
 import { useNavigate, useLocation } from 'react-router-dom'
 import axios from '../config/axios'
-import { initializeSocket, receiveMessage, sendMessage } from '../config/socket.js'
+import { initializeSocket, receiveMessage, sendMessage } from '../config/socket'
+import Markdown from 'markdown-to-jsx'
 
 function SyntaxHighlightedCode(props) {
     const ref = useRef(null)
@@ -18,7 +19,6 @@ function SyntaxHighlightedCode(props) {
 
     return <code {...props} ref={ref} />
 }
-
 
 const Project = () => {
 
@@ -66,16 +66,32 @@ const Project = () => {
 
     }
 
-    useEffect(() => {
-        initializeSocket(project._id)
-    });
+    const send = () => {
+
+        sendMessage('project-message', {
+            message,
+            sender: user
+        })
+        setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ]) // Update messages state
+        setMessage("")
+
+    }
 
     useEffect(() => {
+
+        initializeSocket(project._id)
+
+        receiveMessage('project-message', data => {
+
+            console.log(data)
+            
+        })
+
+
         axios.get(`/projects/get-project/${location.state.project._id}`).then(res => {
 
             console.log(res.data.project)
 
-            setProject(res.data.project)
         })
 
         axios.get('/users/all').then(res => {
@@ -89,8 +105,6 @@ const Project = () => {
         })
 
     }, [])
-
-
 
     // Removed appendIncomingMessage and appendOutgoingMessage functions
 
@@ -125,6 +139,16 @@ const Project = () => {
                                 </div>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="inputField w-full flex absolute bottom-0">
+                        <input
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            className='p-2 px-4 border-none outline-none flex-grow' type="text" placeholder='Enter message' />
+                        <button
+                            onClick={send}
+                            className='px-5 bg-slate-950 text-white'><i className="ri-send-plane-fill"></i></button>
                     </div>
                 </div>
                 <div className={`sidePanel w-full h-full flex flex-col gap-2 bg-slate-50 absolute transition-all ${isSidePanelOpen ? 'translate-x-0' : '-translate-x-full'} top-0`}>
