@@ -21,7 +21,6 @@ io.use(async (socket,next)=>{
 
         const token = socket.handshake.auth?.token || socket.handshake.headers.authorization?.split(' ')[ 1 ];
         const projectId = socket.handshake.query.projectId;
-        console.log(projectId);
 
         if (!mongoose.Types.ObjectId.isValid(projectId)) {
             return next(new Error('Invalid projectId'));
